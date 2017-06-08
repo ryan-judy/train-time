@@ -9,10 +9,11 @@ var config = {
     storageBucket: "train-time-v2.appspot.com",
     messagingSenderId: "241493221184"
   };
+
   firebase.initializeApp(config);
 
-//Set database variable
 var database = firebase.database();
+
 var name = "";
 var destination = "";
 var frequency = 0;
@@ -27,26 +28,35 @@ var number;
 var newBody;
 var schedule;
 var input;
+var a;
+var hours;
+var minutes;
+var b;
 
 var tName = $(".train-name");
 var tDestination = $(".train-destination");
 var tFrequency = $(".train-frequency");
 var tArrival = $(".train-arrival");
+        
+        var currentTime = moment().unix();
+        hours = moment.duration(currentTime).hours();
+        minutes = moment.duration(currentTime).minutes();
+        console.log(hours)
+        console.log(minutes)
+        var b = hours + ":" + minutes;
+        var c = moment(b, "hh:mm").format("hh:mm a")
+        console.log(c)
+        a = moment("1100", "HH:mm").format("hh:mm a");
+        console.log(moment(a).from(moment().unix()))
 
-    database.ref().on("value", function(snapshot) {
 
-      var data = snapshot.val();
+database.ref().on("child_added", function(childSnapshot) {
+
+      data = childSnapshot.val();
       var dataArr = Object.keys(data);
-      var thisObject = data[key];
+      console.log(data.trainName)
 
-      for( var key in data ){
 
-      }
-
-      function displayTable() {
-        for (var i = 0; i < dataArr.length; i++) {
-          ok = dataArr[i];
-          currentObject = data[ok];
             newBody = $("<tbody class = 'train-group'>");
             var newTr = $("<tr>");
             var nameTd = $("<td class = 'train-name'>");
@@ -54,59 +64,46 @@ var tArrival = $(".train-arrival");
             var frequencyTd = $("<td class = 'train-frequency'>");
             var arrivalTd = $("<td class = 'train-arrival'>");
             //var awayTd = $("<td class = 'train-away'>");
-            nameTd.append(currentObject.trainName);
-            desintationTd.append(currentObject.trainDestination);
-            frequencyTd.append(currentObject.trainArrival);
-            arrivalTd.html(currentObject.trainFrequency);
+            nameTd.append(data.trainName);
+            desintationTd.append(data.trainDestination);
+            frequencyTd.append(data.trainArrival);
+            arrivalTd.html(data.trainFrequency);
 
             newTr.append(nameTd);
             newTr.append(desintationTd);
             newTr.append(frequencyTd);
             newTr.append(arrivalTd);
             newBody.append(newTr);
-            $(".table").append(newBody);
-        }
-      }
-      
-      displayTable();
+            $(".table").append(newBody);  
 
+    },  
+
+      function(errorObject) {
+        console.log("Errors handled: " + errorObject.code);
+      });        
+
+      
       $("#submit-button").on("click", function() {
         event.preventDefault();
 
-        var lastIndex = dataArr.length - 1;
-        var lastKey = dataArr[lastIndex];
-        var lastObj = data[lastKey]
-
-        console.log(lastObj);
-        console.log(thisObject.trainName);
-        console.log(thisObject.trainDestination);
-        console.log(thisObject.trainArrival);
-        console.log(thisObject.trainFrequency);
-        
-        //$(".train-name").html(lastObj.trainName);
-        //$(".train-destination").html(lastObj.trainDestination);
-        //$(".train-frequency").html(lastObj.trainFrequency);
-        //$(".train-arrival").html(lastObj.trainArrival);
-                 
         name = $("#name-input").val();
         destination = $("#destination-input").val().trim();
         arrival = $("#first-time-input").val().trim();
         frequency = $("#frequency-input").val().trim();
-        schedule = moment.duration(frequency).asMinutes("hh:mm a");
-        console.log(schedule)
+
         input = moment(arrival, "HH:mm").format("hh:mm a");
 
-          database.ref().push({
+
+
+              database.ref().push({
               trainName: name,
               trainDestination: destination,
               trainArrival: frequency,
-              trainFrequency: input,
+              trainFrequency: input,              
+              
+              });
+
           });
+
       });    
 
-      },  
-
-      function(errorObject) {
-        console.log("Errors handled: " + errorObject.code);
-      });
-});
