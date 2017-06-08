@@ -19,36 +19,11 @@ var destination = "";
 var frequency = 0;
 var arrival = 0;
 
-var away;
-var newGroup;
-var current;
-var ok;
-var currentObject;
-var number;
-var newBody;
-var schedule;
-var input;
-var a;
-var hours;
-var minutes;
-var b;
-
 var tName = $(".train-name");
 var tDestination = $(".train-destination");
 var tFrequency = $(".train-frequency");
 var tArrival = $(".train-arrival");
-        
-        var currentTime = moment().unix();
-        hours = moment.duration(currentTime).hours();
-        minutes = moment.duration(currentTime).minutes();
-        console.log(hours)
-        console.log(minutes)
-        var b = hours + ":" + minutes;
-        var c = moment(b, "hh:mm").format("hh:mm a")
-        console.log(c)
-        a = moment("1100", "HH:mm").format("hh:mm a");
-        console.log(moment(a).from(moment().unix()))
-
+      
 
 database.ref().on("child_added", function(childSnapshot) {
 
@@ -57,22 +32,24 @@ database.ref().on("child_added", function(childSnapshot) {
       console.log(data.trainName)
 
 
-            newBody = $("<tbody class = 'train-group'>");
+            var newBody = $("<tbody class = 'train-group'>");
             var newTr = $("<tr>");
             var nameTd = $("<td class = 'train-name'>");
             var desintationTd = $("<td class = 'train-destination'>");
             var frequencyTd = $("<td class = 'train-frequency'>");
             var arrivalTd = $("<td class = 'train-arrival'>");
-            //var awayTd = $("<td class = 'train-away'>");
+            var awayTd = $("<td class = 'train-away'>");
             nameTd.append(data.trainName);
             desintationTd.append(data.trainDestination);
-            frequencyTd.append(data.trainArrival);
-            arrivalTd.html(data.trainFrequency);
+            frequencyTd.append(data.trainFrequency);
+            arrivalTd.html(data.trainArrival);
+            awayTd.html(data.minAway);
 
             newTr.append(nameTd);
             newTr.append(desintationTd);
             newTr.append(frequencyTd);
             newTr.append(arrivalTd);
+            newTr.append(awayTd)
             newBody.append(newTr);
             $(".table").append(newBody);  
 
@@ -91,17 +68,35 @@ database.ref().on("child_added", function(childSnapshot) {
         arrival = $("#first-time-input").val().trim();
         frequency = $("#frequency-input").val().trim();
 
-        input = moment(arrival, "HH:mm").format("hh:mm a");
+        arrival = moment(arrival, "HH:mm").format("hh:mm a");
 
+          var firstTimeConverted = moment(arrival ,"hh:mm a").subtract(1, "years");
+            console.log(firstTimeConverted);
+              var currentTime = moment();
+            console.log("Current Time is: " + moment(currentTime).format("hh:mm a"));
 
+          var diffTime = moment().diff(moment(firstTimeConverted), "minutes");
+
+          var tRemainder = diffTime % frequency; 
+
+          var minAway = frequency - tRemainder;
+
+          var nextTrain = moment().add(minAway, "minutes");
+            arrival = moment(nextTrain).format("hh:mm a");
 
               database.ref().push({
               trainName: name,
               trainDestination: destination,
-              trainArrival: frequency,
-              trainFrequency: input,              
+              trainFrequency: frequency,
+              trainArrival: arrival,
+              minAway: minAway              
               
               });
+
+        name = $("#name-input").empty();
+        destination = $("#destination-input").empty();
+        arrival = $("#first-time-input").empty();
+        frequency = $("#frequency-input").empty();
 
           });
 
