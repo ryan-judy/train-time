@@ -11,4 +11,4 @@ A train schedule application that incorporates Firebase to host arrival and depa
 5. Firebase
 6. Moment.js
 
-[View the application live on Heroku!] (https://ryan-judy.github.io/train-time/)
+[View the application live on Heroku!](https://ryan-judy.github.io/train-time/)
